@@ -1,0 +1,71 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(80)
+  email     String   @db.VarChar(255)
+  phone     String?  @db.VarChar(20)
+  company   String?  @db.VarChar(100)
+  service   String?  @db.VarChar(100)
+  budget    String?  @db.VarChar(50)
+  subject   String   @db.VarChar(150)
+  message   String   @db.Text
+  status    String   @default("Pending") @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model AdminUser {
+  id                  String    @id @default(cuid())
+  authUserId          String    @unique
+  fullName            String    @db.VarChar(100)
+  email               String    @unique @db.VarChar(255)
+  role                String    @default("Admin") @db.VarChar(20)
+  twoFactorEnabled    Boolean   @default(false)
+  twoFactorSecret     String?   @db.VarChar(255)
+  twoFactorVerifiedAt DateTime?
+  backupCodes         String[]  @default([])
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([authUserId])
+  @@index([email])
+}
+
+model Conversation {
+  id          String    @id @default(cuid())
+  visitorId   String    @db.VarChar(100)
+  visitorName String?   @db.VarChar(100)
+  status      String    @default("Open") @db.VarChar(50)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  messages    Message[]
+
+  @@index([visitorId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String       @db.VarChar(100)
+  sender         String       @db.VarChar(20)
+  content        String       @db.Text
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([createdAt])
+}
+
