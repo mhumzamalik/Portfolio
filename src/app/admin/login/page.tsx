@@ -78,6 +78,17 @@ export default function AdminLoginPage() {
       });
     };
     document.head.appendChild(script);
+
+    // Clean up script and badge when login page unmounts (e.g. after successful login)
+    return () => {
+      recaptchaReady.current = false;
+      const injected = document.getElementById("recaptcha-script");
+      if (injected) injected.remove();
+      // Google injects a badge iframe into body; remove it to avoid leaking it
+      // into authenticated dashboard pages.
+      const badge = document.querySelector(".grecaptcha-badge");
+      if (badge && badge.parentElement) badge.parentElement.remove();
+    };
   }, []);
 
   useEffect(() => {
