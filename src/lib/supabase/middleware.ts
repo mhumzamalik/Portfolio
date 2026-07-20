@@ -1,6 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
-import { isVerifiedTwoFactorSession } from "@/lib/security/two-factor-session";
+import {
+  isVerifiedTwoFactorSession,
+  clearVerifiedTwoFactorCookie,
+  clearPendingTwoFactorCookie,
+} from "@/lib/security/two-factor-session";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
@@ -15,6 +19,27 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
     response.headers.set(key, value);
   }
   return response;
+}
+
+function redirectWithCookies(
+  url: URL,
+  supabaseResponse: NextResponse
+): NextResponse {
+  const redirectResponse = NextResponse.redirect(url);
+  
+  supabaseResponse.cookies.getAll().forEach((cookie) => {
+    redirectResponse.cookies.set(cookie.name, cookie.value, {
+      path: cookie.path,
+      domain: cookie.domain,
+      expires: cookie.expires,
+      maxAge: cookie.maxAge,
+      secure: cookie.secure,
+      httpOnly: cookie.httpOnly,
+      sameSite: cookie.sameSite,
+    });
+  });
+
+  return applySecurityHeaders(redirectResponse);
 }
 
 export async function updateSession(request: NextRequest) {
@@ -39,6 +64,12 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
+          
+          const cookieStrings = request.cookies.getAll().map(
+            (c) => `${c.name}=${c.value}`
+          );
+          requestHeaders.set("Cookie", cookieStrings.join("; "));
+
           supabaseResponse = NextResponse.next({
             request: {
               headers: requestHeaders,
@@ -60,13 +91,37 @@ export async function updateSession(request: NextRequest) {
   if (isAdminRoute) {
     const {
       data: { user },
+      error,
     } = await supabase.auth.getUser();
+
+    if (error) {
+      const errorMsg = error.message?.toLowerCase() || "";
+      const isRefreshTokenError =
+        error.status === 400 ||
+        errorMsg.includes("refresh_token") ||
+        errorMsg.includes("invalid_grant");
+
+      if (isRefreshTokenError) {
+        // Clear all cookies starting with 'sb-' or containing 'auth-token'
+        const allCookies = request.cookies.getAll();
+        allCookies.forEach((cookie) => {
+          if (cookie.name.startsWith("sb-") || cookie.name.includes("auth-token")) {
+            supabaseResponse.cookies.set(cookie.name, "", { maxAge: 0, path: "/" });
+            request.cookies.delete(cookie.name);
+          }
+        });
+
+        // Also clear 2FA session cookies to keep everything in sync
+        clearVerifiedTwoFactorCookie(supabaseResponse);
+        clearPendingTwoFactorCookie(supabaseResponse);
+      }
+    }
 
     if (!user) {
       if (!isLoginPage) {
         const url = request.nextUrl.clone();
         url.pathname = "/admin/login";
-        return applySecurityHeaders(NextResponse.redirect(url));
+        return redirectWithCookies(url, supabaseResponse);
       }
     } else {
       const is2faVerified = await isVerifiedTwoFactorSession(request);
@@ -74,13 +129,13 @@ export async function updateSession(request: NextRequest) {
         if (isLoginPage) {
           const url = request.nextUrl.clone();
           url.pathname = "/admin";
-          return applySecurityHeaders(NextResponse.redirect(url));
+          return redirectWithCookies(url, supabaseResponse);
         }
       } else {
         if (!isLoginPage) {
           const url = request.nextUrl.clone();
           url.pathname = "/admin/login";
-          return applySecurityHeaders(NextResponse.redirect(url));
+          return redirectWithCookies(url, supabaseResponse);
         }
       }
     }
