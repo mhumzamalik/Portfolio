@@ -20,33 +20,68 @@ export interface Project {
 
 export const projects: Project[] = [
   {
-    id: "zenith",
-    title: "Zenith Workspace",
+    id: "luxora",
+    title: "LUXORA E-Commerce",
     category: "Full Stack",
-    categories: ["Next.js", "Supabase", "Full Stack"],
-    description: "A luxury project management application styled after Linear and Apple interfaces. Designed for high-performance software engineering teams with real-time syncing.",
-    image: "/projects/zenith.jpg",
-    techStack: ["Next.js", "TypeScript", "Supabase", "Tailwind CSS", "Framer Motion", "PostgreSQL"],
-    github: "https://github.com/mhamza/zenith-workspace",
-    liveDemo: "https://zenith-workspace.vercel.app",
-    problem: "Traditional issue tracking and project management tools are sluggish, cluttered, and separate communication from documentation. Teams lose productivity waiting for page refreshes and looking for context.",
-    solution: "Zenith brings real-time database subscriptions, clean typography, keyboard-centric controls, and minimal visual distraction together in an App-router React application.",
+    categories: ["Next.js", "E-Commerce", "Full Stack"],
+    description:
+      "A premium full-stack fashion e-commerce platform built for a modern shopping experience. LUXORA combines a cinematic storefront with powerful product management, secure checkout, inventory control, flash sales, coupons, and an admin dashboard.",
+    image: "/projects/luxora.jpg",
+    techStack: [
+      "Next.js 16",
+      "TypeScript",
+      "PostgreSQL",
+      "Prisma",
+      "Supabase",
+      "Tailwind CSS",
+      "shadcn/ui",
+      "Framer Motion",
+      "Zod",
+      "React Hook Form",
+      "Sentry"
+    ],
+    github: "https://github.com/mhamza/luxora",
+    liveDemo: "https://luxorahz.vercel.app/",
+
+    problem:
+      "Many e-commerce platforms provide a basic shopping experience but lack a polished user interface, flexible product management, reliable inventory handling, and a seamless connection between the customer storefront and administrative operations.",
+
+    solution:
+      "LUXORA provides a production-focused e-commerce ecosystem with a premium responsive storefront, optimized product discovery, variant and size management, real-time inventory visibility, flash sales, coupons, secure checkout, order management, and a dedicated admin dashboard.",
+
     role: "Lead Full Stack Developer",
-    duration: "4 Months",
+
+    duration: "6 Months",
+
     architecture: [
-      "Frontend: Next.js 15 (App Router) for hybrid static/dynamic generation.",
-      "Database & Authentication: Supabase (PostgreSQL) with Row-Level Security (RLS).",
-      "Real-time Syncing: Supabase Realtime Channels for immediate notification and board updates.",
-      "State Management: React Query for optimistic updates and caching."
+      "Frontend: Next.js 16 App Router with server and client components for a fast, SEO-friendly shopping experience.",
+      "Database: PostgreSQL with Prisma ORM for strongly typed relational data management.",
+      "Authentication: Secure customer and admin authentication with role-based authorization.",
+      "Storage: Supabase Storage for product images and order payment proof uploads.",
+      "State Management: React-based client state with optimized caching and request deduplication.",
+      "Validation & Security: Zod validation, bcrypt password hashing, rate limiting, security headers, and protected API routes.",
+      "Monitoring: Sentry for production error tracking and application monitoring.",
+      "Deployment: Vercel with production-oriented caching and database connection optimization."
     ],
+
     features: [
-      "Keyboard shortcuts (Cmd+K) for immediate workspace-wide actions.",
-      "Drag-and-drop kanban boards with optimistic state updates.",
-      "Real-time multiplayer cursor tracking and board state synchronization.",
-      "Offline-first support using local storage persistence."
+      "Premium responsive fashion storefront with product discovery and category browsing.",
+      "Advanced product management with images, primary image selection, variants, sizes, colors, and stock management.",
+      "Automatic size availability with unavailable sizes disabled when inventory reaches zero.",
+      "Best Seller and New Arrival homepage sections controlled directly from the admin panel.",
+      "Flash Sale system with sale pricing, scheduling, and dedicated sale-product visibility.",
+      "Shopping cart, wishlist, checkout, coupons, discounts, and shipping calculations.",
+      "Customer order tracking and comprehensive admin order management.",
+      "Admin dashboard for products, categories, inventory, orders, coupons, banners, and sales.",
+      "Optimized product and homepage APIs with caching, request deduplication, and lean database queries.",
+      "AI-powered shopping assistance for helping customers discover suitable products."
     ],
-    challenges: "Synchronizing state across multiple active collaborative clients without race conditions or overwriting updates was a critical bottleneck. Optimistic updates in React Query sometimes conflicted with incoming database subscription channels.",
-    results: "Designed a state consolidation engine that prioritizes user actions locally but rolls back smoothly if a validation error occurs. Active users reported 40% reduction in coordination overhead."
+
+    challenges:
+      "Building a reliable e-commerce platform required coordinating products, variants, inventory, pricing, flash sales, orders, and customer interactions while keeping the storefront fast. Maintaining a single source of truth for product availability and ensuring that products appear only in their intended homepage sections were particularly important challenges.",
+
+    results:
+      "Built a scalable full-stack e-commerce platform with a premium customer experience and centralized administration. Optimized API responses through Prisma query optimization, connection pooling, caching, and request deduplication while implementing production-focused security, monitoring, inventory management, and order workflows."
   },
   {
     id: "devflow",
